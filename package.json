@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@types/node": "^18.11.17",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "pnpm run build && node dist/index.js"
+  }
+}
