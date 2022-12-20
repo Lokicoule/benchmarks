@@ -1,5 +1,4 @@
 import { IBenchmark, Benchmark, BenchmarkResult } from "../core/benchmark";
-import { promisify } from "../core/promisify";
 
 function randomMessage(): string {
   const messages = [
@@ -111,13 +110,27 @@ function sortBenchmarks(benchmarks: IBenchmark[]): IBenchmark[] {
   return benchmarks.sort((a, b) => a.compare(b));
 }
 
-export async function run(nbIterations = 100) {
-  const benchmarkRegexResult = await promisify(benchmarkRegex(nbIterations));
-  const benchmarkSwitchResult = await promisify(benchmarkSwitch(nbIterations));
-  const benchmarkArrayResult = await promisify(benchmarkArray(nbIterations));
-  const benchmarkIfStatementResult = await promisify(
-    benchmarkIfStatement(nbIterations)
+function displayRatio(benchmark: IBenchmark, reference: IBenchmark): void {
+  console.group("Ratio between fastest and slowest benchmarks");
+  console.log(
+    `${benchmark.name} is ${reference.compare(benchmark)} times faster than ${
+      reference.name
+    }`
   );
+  console.log(
+    `${benchmark.name} is ${
+      100 - 100 * (benchmark.getAverage() / reference.getAverage())
+    }% faster than ${reference.name}`
+  );
+
+  console.groupEnd();
+}
+
+export function run(nbIterations = 100) {
+  const benchmarkRegexResult = benchmarkRegex(nbIterations);
+  const benchmarkSwitchResult = benchmarkSwitch(nbIterations);
+  const benchmarkArrayResult = benchmarkArray(nbIterations);
+  const benchmarkIfStatementResult = benchmarkIfStatement(nbIterations);
 
   const benchmarks = sortBenchmarks([
     benchmarkRegexResult,
@@ -127,5 +140,6 @@ export async function run(nbIterations = 100) {
   ]);
   console.group("Benchmarks");
   benchmarks.map(displayResults);
+  displayRatio(benchmarks[0], benchmarks[benchmarks.length - 1]);
   console.groupEnd();
 }
